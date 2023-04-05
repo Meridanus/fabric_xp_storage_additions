@@ -29,6 +29,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class XpItemInserter extends BlockWithEntity implements Waterloggable {
 
     public XpItemInserter() {
@@ -68,6 +70,11 @@ public class XpItemInserter extends BlockWithEntity implements Waterloggable {
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
         boolean bl = fluidState.getFluid() == Fluids.WATER;
+        // When player is sneaking place the block in Facing direction
+        if (Objects.requireNonNull(ctx.getPlayer()).isSneaking()) {
+            return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing()).with(Properties.WATERLOGGED, bl);
+        }
+        // If not place it the opposite way
         return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite()).with(Properties.WATERLOGGED, bl);
     }
     @SuppressWarnings("deprecation")
