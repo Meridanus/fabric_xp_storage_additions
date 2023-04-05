@@ -28,9 +28,9 @@
   "mixins": ["xp_obelisk_additions_mixin.json"],
 
   "depends": {
-    "fabricloader": ">=0.14.6",
+    "fabricloader": ">=0.14.17",
     "fabric": "*",
-    "minecraft": "1.19.x",
+    "minecraft": "1.19.4",
     "java": ">=17"
   }
 }
