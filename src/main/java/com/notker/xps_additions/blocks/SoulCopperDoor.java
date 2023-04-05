@@ -1,10 +1,10 @@
 package com.notker.xps_additions.blocks;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.block.BlockSetType;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.Material;
 import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundEvents;
 
 public class SoulCopperDoor extends DoorBlock {
 
@@ -15,7 +15,6 @@ public class SoulCopperDoor extends DoorBlock {
                         .strength(5f, 5f)
                         .nonOpaque()
                         .requiresTool(),
-                SoundEvents.BLOCK_IRON_DOOR_CLOSE,
-                SoundEvents.BLOCK_IRON_DOOR_OPEN);
+                        BlockSetType.IRON);
     }
 }
