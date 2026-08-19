@@ -1,9 +1,7 @@
 package com.notker.xps_additions.items;
 
-import com.notker.xp_storage.XpStorage;
 import com.notker.xps_additions.XpsAdditions;
 import com.notker.xps_additions.TooltipHelper;
-import com.notker.xps_additions.effects.GiggleStatusEffect;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.LivingEntity;
@@ -57,7 +55,7 @@ public class Mystical_Candy extends Item {
                 Text.translatable("effect.xps_additions.giggle"),
                 TooltipHelper.potionTooltipHelper(XpsAdditions.GIGGLE_EFFECT_DURATION),
                 TooltipHelper.chanceToString(XpsAdditions.GIGGLE_EFFECT_CHANCE)
-        ).formatted(new GiggleStatusEffect().getCategory().getFormatting()));
+        ).formatted(XpsAdditions.GIGGLE.getCategory().getFormatting()));
         tooltip.add(Text.translatable("item.tooltip.mystical_candy_effect",
                 Text.translatable("effect.minecraft.haste"),
                 TooltipHelper.potionTooltipHelper(XpsAdditions.HASTE_EFFECT_AMPLIFIER, XpsAdditions.HASTE_EFFECT_DURATION),

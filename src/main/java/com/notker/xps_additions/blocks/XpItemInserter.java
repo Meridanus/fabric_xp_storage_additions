@@ -17,6 +17,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
@@ -29,13 +30,32 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-
 public class XpItemInserter extends BlockWithEntity implements Waterloggable {
+
+    // Shapes are immutable, so build them once instead of on every outline/collision query.
+    private static final VoxelShape CENTER_SHAPE = VoxelShapes.union(
+            Block.createCuboidShape(1D, 0D, 1D, 15D, 1D, 15D),   // bottom
+            Block.createCuboidShape(3D, 1D, 3D, 13D, 13D, 13D),  // middle
+            Block.createCuboidShape(5D, 13D, 5D, 11D, 16D, 11D)  // top
+    );
+    private static final VoxelShape NORTH_OUT = Block.createCuboidShape(6D, 6D, -1D, 10D, 10D, 3D);  // Output
+    private static final VoxelShape EAST_OUT = Block.createCuboidShape(13D, 6D, 6D, 17D, 10D, 10D);  // Output
+    private static final VoxelShape SOUTH_OUT = Block.createCuboidShape(6D, 6D, 13D, 10D, 10D, 17D); // Output
+    private static final VoxelShape WEST_OUT = Block.createCuboidShape(-1D, 6D, 6D, 3D, 10D, 10D);   // Output
+    private static final VoxelShape NORTH_IN = Block.createCuboidShape(5D, 3D, 0D, 11D, 9D, 3D);     // Input
+    private static final VoxelShape WEST_IN = Block.createCuboidShape(0D, 3D, 5D, 3D, 9D, 11D);      // Input
+    private static final VoxelShape SOUTH_IN = Block.createCuboidShape(5D, 3D, 13D, 11D, 9D, 16D);   // Input
+    private static final VoxelShape EAST_IN = Block.createCuboidShape(13D, 3D, 5D, 16D, 9D, 11D);    // Input
+
+    private static final VoxelShape SHAPE_NORTH = VoxelShapes.union(CENTER_SHAPE, NORTH_OUT, EAST_IN, SOUTH_IN, WEST_IN);
+    private static final VoxelShape SHAPE_SOUTH = VoxelShapes.union(CENTER_SHAPE, NORTH_IN, EAST_IN, SOUTH_OUT, WEST_IN);
+    private static final VoxelShape SHAPE_EAST = VoxelShapes.union(CENTER_SHAPE, NORTH_IN, EAST_OUT, SOUTH_IN, WEST_IN);
+    private static final VoxelShape SHAPE_WEST = VoxelShapes.union(CENTER_SHAPE, NORTH_IN, EAST_IN, SOUTH_IN, WEST_OUT);
 
     public XpItemInserter() {
         super(FabricBlockSettings
-                .of(Material.METAL)
+                .create()
+                .mapColor(MapColor.IRON_GRAY)
                 .sounds(BlockSoundGroup.METAL)
                 .strength(6f, 6f)
                 .requiresTool()
@@ -71,18 +91,19 @@ public class XpItemInserter extends BlockWithEntity implements Waterloggable {
         FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
         boolean bl = fluidState.getFluid() == Fluids.WATER;
 
-        // Place Block the same Direction as the Player when sneaking
-        if (Objects.requireNonNull(ctx.getPlayer()).isSneaking()) {
-            return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing()).with(Properties.WATERLOGGED, bl);
-        }
-        // Place Block the opposite Direction as the Player
+        // The player can be null when the block is placed by a dispenser / other automation
+        PlayerEntity player = ctx.getPlayer();
+        boolean sneaking = player != null && player.isSneaking();
 
-        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing().getOpposite()).with(Properties.WATERLOGGED, bl);
+        // Sneaking: place the block facing the same direction as the player, otherwise facing the player
+        Direction facing = sneaking ? ctx.getHorizontalPlayerFacing() : ctx.getHorizontalPlayerFacing().getOpposite();
+
+        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, facing).with(Properties.WATERLOGGED, bl);
     }
     @SuppressWarnings("deprecation")
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         if (state.get(Properties.WATERLOGGED)) {
-            world.getFluidTickScheduler().isTicking(pos, Fluids.WATER);
+            world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
         }
 
         return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
@@ -93,51 +114,25 @@ public class XpItemInserter extends BlockWithEntity implements Waterloggable {
         return state.get(Properties.WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
-    public boolean tryFillWithFluid(WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
-        if (!(Boolean)state.get(Properties.WATERLOGGED) && fluidState.getFluid() == Fluids.WATER) {
-            BlockState blockState = state.with(Properties.WATERLOGGED, true);
-
-            world.setBlockState(pos, blockState, 3);
-            world.getFluidTickScheduler().isTicking(pos, Fluids.WATER);
-            return true;
-        } else {
-            return false;
-        }
+    @Override
+    @SuppressWarnings("deprecation")
+    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext ctx) {
+        return switch (state.get(Properties.HORIZONTAL_FACING)) {
+            case SOUTH -> SHAPE_SOUTH;
+            case EAST -> SHAPE_EAST;
+            case WEST -> SHAPE_WEST;
+            default -> SHAPE_NORTH;
+        };
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext ctx) {
-
-        VoxelShape bottom = Block.createCuboidShape(1D, 0D, 1D, 15D, 1D, 15D);
-        VoxelShape middle = Block.createCuboidShape(3D, 1D, 3D, 13D, 13D, 13D);
-        VoxelShape top = Block.createCuboidShape(5D, 13D, 5D, 11D, 16D, 11D);
-
-        VoxelShape north_out = Block.createCuboidShape(6D, 6D, -1D, 10D, 10D, 3D); // Output
-        VoxelShape east_out = Block.createCuboidShape(13D, 6D, 6D, 17D, 10D, 10D); // Output
-        VoxelShape south_out = Block.createCuboidShape(6D, 6D, 13D, 10D, 10D, 17D); // Output
-        VoxelShape west_out = Block.createCuboidShape(-1D, 6D, 6D, 3D, 10D, 10D); // Output
-
-        VoxelShape north_in = Block.createCuboidShape(5D, 3D, 0D, 11D, 9D, 3D); // Input
-        VoxelShape west_in = Block.createCuboidShape(0D, 3D, 5D, 3D, 9D, 11D); // Input
-        VoxelShape south_in = Block.createCuboidShape(5D, 3D, 13D, 11D, 9D, 16D); // Input
-        VoxelShape east_in = Block.createCuboidShape(13D, 3D, 5D, 16D, 9D, 11D); // Input
-
-        VoxelShape centerPart = VoxelShapes.union(bottom, middle, top);
-
-        Direction dir = state.get(Properties.HORIZONTAL_FACING);
-
-        return switch (dir) {
-            case NORTH -> VoxelShapes.union(centerPart, north_out, east_in, south_in, west_in);
-            case SOUTH -> VoxelShapes.union(centerPart, north_in, east_in, south_out, west_in);
-            case EAST -> VoxelShapes.union(centerPart, north_in, east_out, south_in, west_in);
-            case WEST -> VoxelShapes.union(centerPart, north_in, east_in, south_in, west_out);
-            default -> VoxelShapes.union(centerPart);
-        };
-
+    public BlockState rotate(BlockState state, BlockRotation rotation) {
+        return state.with(Properties.HORIZONTAL_FACING, rotation.rotate(state.get(Properties.HORIZONTAL_FACING)));
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public BlockState mirror(BlockState state, BlockMirror mirror) {
         return state.rotate(mirror.getRotation(state.get(Properties.HORIZONTAL_FACING)));
     }
@@ -154,6 +149,7 @@ public class XpItemInserter extends BlockWithEntity implements Waterloggable {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (state.getBlock() != newState.getBlock()) {
             BlockEntity entity = world.getBlockEntity(pos);
@@ -170,8 +166,8 @@ public class XpItemInserter extends BlockWithEntity implements Waterloggable {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, AdditionBlocks.XP_ITEM_INSERTER_ENTITY, XpItemInserterEntity::tick);
-        //return BlockEntityProvider.super.getTicker(world, state, type);
+        // The inventory only exists server side, so there is nothing to do on the client
+        return world.isClient ? null : checkType(type, AdditionBlocks.XP_ITEM_INSERTER_ENTITY, XpItemInserterEntity::tick);
     }
 
 }

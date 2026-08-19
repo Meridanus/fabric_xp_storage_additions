@@ -4,9 +4,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-
-import java.util.Random;
+import net.minecraft.util.math.random.Random;
 
 
 public class GiggleStatusEffect extends StatusEffect {
@@ -31,27 +31,27 @@ public class GiggleStatusEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if (entity instanceof PlayerEntity) {
-            //((PlayerEntity) entity).giveItemStack(new ItemStack(Items.GOLD_NUGGET, 1 << amplifier));
+        if (entity instanceof PlayerEntity player) {
+            Random random = entity.getRandom();
 
-            //Horizontal
-            float x = new Random().nextFloat(0.4f) - 0.2f;
-            float z = new Random().nextFloat(0.4f) - 0.2f;
+            //Horizontal hiccup hop (runs on both sides so the local player sees it)
+            float x = random.nextFloat() * 0.4f - 0.2f;
+            float z = random.nextFloat() * 0.4f - 0.2f;
+            entity.addVelocity(x, 0.2f, z);
 
-            //Vertical
-            //float y = new Random().nextFloat(0.4f);
+            // Inventory changes are server authoritative; doing them on the client only desyncs the inventory
+            if (entity.getWorld().isClient) {
+                return;
+            }
 
-            entity.addVelocity(x, 0.2f ,z);
+            //Random inventory slot without Hotbar/Armor/Offhand (main inventory = slots 9..35)
+            int randomSlot = random.nextInt(PlayerInventory.MAIN_SIZE - PlayerInventory.getHotbarSize()) + PlayerInventory.getHotbarSize();
 
-            //Random Inventor slot without Hotbar/Armor/Offhand
-            int randomSlot = new Random().nextInt(26) + 9;
-
-            ItemStack itemToDrop = ((PlayerEntity) entity).getInventory().getStack(randomSlot).copy();
+            ItemStack itemToDrop = player.getInventory().getStack(randomSlot).copy();
             if (!itemToDrop.isEmpty()) {
-
-                ((PlayerEntity) entity).getInventory().getStack(randomSlot).decrement(1);
+                player.getInventory().getStack(randomSlot).decrement(1);
                 itemToDrop.setCount(1);
-                ((PlayerEntity) entity).dropItem(itemToDrop,true,true);
+                player.dropItem(itemToDrop, true, true);
             }
 
         }

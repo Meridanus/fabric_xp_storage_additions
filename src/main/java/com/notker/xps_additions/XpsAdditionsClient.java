@@ -1,21 +1,13 @@
 package com.notker.xps_additions;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.notker.xps_additions.items.StaffOfRebark;
-import com.notker.xps_additions.mixin.AxeItemAccessor;
 import com.notker.xps_additions.regestry.AdditionBlocks;
-import com.notker.xps_additions.regestry.AdditionItems;
 import com.notker.xps_additions.screen.PositionedScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.registry.Registry;
 
 
 public class XpsAdditionsClient implements ClientModInitializer {
@@ -27,27 +19,7 @@ public class XpsAdditionsClient implements ClientModInitializer {
 
         HandledScreens.register(XpsAdditions.BOX_SCREEN_HANDLER, PositionedScreen::new);
 
-        ClientPlayConnectionEvents.JOIN.register((packetListener, packetSender, mc) -> {
-            if (StaffOfRebark.STRIPPED_BLOCKS == null) {
-                // get Actual Name of Staff
-                final String staffName = Text.translatable(AdditionItems.STAFF_OF_REBARK.getTranslationKey()).getString();
-                // Start Logging Process
-                XpsAdditions.LOGGER.info("Null on Server -> Add Log/Stripped variants to " + staffName);
-
-                // Create Map Builder
-                ImmutableMultimap.Builder<Block, Block> builder = ImmutableMultimap.builder();
-                // Get Blocks from Mixin and put it switched in to Map
-                AxeItemAccessor.getStrip().forEach((block, strippedBlock) -> builder.put(strippedBlock, block));
-                // Build the Map
-                Multimap<Block, Block> strippedBlock_Block = builder.build();
-                // Add Map to Staff
-                StaffOfRebark.STRIPPED_BLOCKS = strippedBlock_Block;
-
-                // InfoLogg Blocks
-                strippedBlock_Block.forEach((block, block2) -> XpsAdditions.LOGGER.info(staffName + " add: " + Registries.BLOCK.getId(block) + " to " +  Registries.BLOCK.getId(block2)));
-                // End Staff Logging
-                XpsAdditions.LOGGER.info("Finished adding " + strippedBlock_Block.size() + " Blocks to " + staffName);
-            }
-        });
+        // Build the stripped -> unstripped block map once all mods registered their strippable blocks
+        ClientPlayConnectionEvents.JOIN.register((packetListener, packetSender, mc) -> StaffOfRebark.getStrippedBlocks());
     }
 }

@@ -1,7 +1,7 @@
 {
   "name": "block.xps.block_soul_copper",
   "icon": "xps_additions:soul_copper_door",
-  "category": "xps_additions:additions_category",
+  "category": "xps:additions_category",
   "sortnum": 1,
   "pages": [
     {

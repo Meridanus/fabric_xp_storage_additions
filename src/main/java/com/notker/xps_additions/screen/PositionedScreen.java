@@ -1,10 +1,8 @@
 package com.notker.xps_additions.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import com.notker.xp_storage.XpFunctions;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -16,6 +14,10 @@ public class PositionedScreen extends HandledScreen<ScreenHandler> {
 
     int[] color = {0xec00b8, 0x99ff33, 4210752, 0x000000}; //Purple - Green - light Gray - Black
 
+    // The texture is a standard 166 px tall 3x3 container GUI with a 34 px XP header drawn above it
+    private static final int HEADER_HEIGHT = 34;
+    private static final int BODY_HEIGHT = 166;
+
 
     public PositionedScreen(ScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -23,37 +25,36 @@ public class PositionedScreen extends HandledScreen<ScreenHandler> {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         int xp = screenHandler.getSyncedNumber();
-        int y = ((height - backgroundHeight) / 2) + 6;
+        // Anchor the header to the container origin so it stays aligned after a resize
+        int y = this.y - HEADER_HEIGHT + 23;
 
 
 
-        //renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
-        drawMouseoverTooltip(matrices, mouseX, mouseY);
+        //renderBackground(context);
+        super.render(context, mouseX, mouseY, delta);
 
         //Draw Storage Title
-        int xStorage = (width - textRenderer.getWidth(Text.translatable("block.xps.block_xp_obelisk"))) / 2;
-        textRenderer.draw(matrices, Text.translatable("block.xps.block_xp_obelisk"), xStorage, y - 15, color[3]);
+        Text storageTitle = Text.translatable("block.xps.block_xp_obelisk");
+        int xStorage = (width - textRenderer.getWidth(storageTitle)) / 2;
+        context.drawText(textRenderer, storageTitle, xStorage, y - 15, color[3], false);
 
         //Draw Xp bar Background
 
         //Vanilla Xp Bar
-        //RenderSystem.setShaderTexture(0, DrawableHelper.GUI_ICONS_TEXTURE);
         //int v = 64;
         //int barWidth = 182;
         //int barHeight = 5;
 
         //Custom xp Bar
-        RenderSystem.setShaderTexture(0, TEXTURE);
         int v = 228; //236
         int barWidth = 164; // 162
         int barHeight = 7; //5
 
 
 
-        drawTexture(matrices,  (width - barWidth) / 2  , y + (barHeight - 1), 0, v, barWidth, barHeight);
+        context.drawTexture(TEXTURE, (width - barWidth) / 2, y + (barHeight - 1), 0, v, barWidth, barHeight);
 
         int level = XpFunctions.getLevelFromExp(xp);
         int excess_xp = xp - XpFunctions.get_total_xp_value_from_level(level);
@@ -62,26 +63,35 @@ public class PositionedScreen extends HandledScreen<ScreenHandler> {
 
         //Draw Xp bar Overlay
         if (container_progress > 0) {
-           int scaledWidth = (int)(container_progress * (float)barWidth + 1f);
-            drawTexture(matrices, (width - barWidth) / 2 , y + (barHeight - 1), 0, v + barHeight, scaledWidth, barHeight);
+            int scaledWidth = (int)(container_progress * (float)barWidth + 1f);
+            context.drawTexture(TEXTURE, (width - barWidth) / 2, y + (barHeight - 1), 0, v + barHeight, scaledWidth, barHeight);
         }
 
         //Draw Level String
         String string = String.valueOf(level);
         int levelStringCenter = (width - textRenderer.getWidth(string)) / 2;
 
-        textRenderer.draw(matrices, string, (levelStringCenter + 1), y, 0);
-        textRenderer.draw(matrices, string, (levelStringCenter - 1), y, 0);
-        textRenderer.draw(matrices, string, levelStringCenter, (y + 1), 0);
-        textRenderer.draw(matrices, string, levelStringCenter, (y - 1), 0);
-        textRenderer.draw(matrices, string, levelStringCenter, y, color[1]);
+        context.drawText(textRenderer, string, (levelStringCenter + 1), y, 0, false);
+        context.drawText(textRenderer, string, (levelStringCenter - 1), y, 0, false);
+        context.drawText(textRenderer, string, levelStringCenter, (y + 1), 0, false);
+        context.drawText(textRenderer, string, levelStringCenter, (y - 1), 0, false);
+        context.drawText(textRenderer, string, levelStringCenter, y, color[1], false);
+
+        // Tooltips last, so they are drawn above the xp bar and the texts
+        drawMouseoverTooltip(context, mouseX, mouseY);
+    }
+
+    // HandledScreen uses this to decide if a click lands outside the GUI (which drops the carried item),
+    // so it has to cover the header that is drawn above the regular container area
+    @Override
+    protected boolean isClickOutsideBounds(double mouseX, double mouseY, int left, int top, int button) {
+        return mouseX < left || mouseY < top - HEADER_HEIGHT || mouseX >= left + backgroundWidth || mouseY >= top + BODY_HEIGHT;
     }
 
     @Override
     protected void init() {
         super.init();
         // Center the title
-        backgroundHeight = 200;
         this.titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2;
         this.titleY = 4;
 
@@ -89,16 +99,15 @@ public class PositionedScreen extends HandledScreen<ScreenHandler> {
     }
 
     @Override
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, TEXTURE);
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         int x = (width - backgroundWidth) / 2;
-        int y = -17 + (height - backgroundHeight) / 2;
-        drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
+        int y = this.y - HEADER_HEIGHT;
+        context.drawTexture(TEXTURE, x, y, 0, 0, backgroundWidth, HEADER_HEIGHT + BODY_HEIGHT);
     }
 
-    protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-        this.textRenderer.draw(matrices, this.title, (float)this.titleX, (float)this.titleY, color[3]);
-        this.textRenderer.draw(matrices, this.playerInventoryTitle, (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY, color[3]);
+    @Override
+    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+        context.drawText(this.textRenderer, this.title, this.titleX, this.titleY, color[3], false);
+        context.drawText(this.textRenderer, this.playerInventoryTitle, this.playerInventoryTitleX, this.playerInventoryTitleY, color[3], false);
     }
 }

@@ -18,6 +18,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -71,6 +72,7 @@ public class XpItemInserterEntity extends BlockEntity implements ImplementedInve
     @Override
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
+        items.clear();
         Inventories.readNbt(nbt, items);
     }
 
@@ -90,6 +92,52 @@ public class XpItemInserterEntity extends BlockEntity implements ImplementedInve
         return XpsAdditions.ITEM_SLOTS;
     }
 
+    /**
+     * Only let hoppers / pipes push things in that the inserter can actually turn into XP,
+     * otherwise a hopper line fills every slot with junk and the inserter stops working.
+     */
+    @Override
+    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction side) {
+        return xpValueMb(stack) > 0;
+    }
+
+    /** Keeps the GUI from being used from far away or after the block was removed. */
+    @Override
+    public boolean canPlayerUse(PlayerEntity player) {
+        return Inventory.canPlayerUse(this, player);
+    }
+
+    /** Liquid XP (in mB) that the whole stack is worth, 0 if the item can not be inserted. */
+    public static long xpValueMb(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        if (stack.isOf(ModItems.XP_BERRIES)) {
+            return XpStorage.MB_PER_BERRIE * stack.getCount();
+        }
+        if (stack.isOf(ModFluids.XP_BUCKET)) {
+            return FluidConstants.BUCKET * stack.getCount();
+        }
+        if (stack.isOf(Items.EXPERIENCE_BOTTLE)) {
+            return FluidConstants.BOTTLE * stack.getCount();
+        }
+        if (stack.isOf(Items.SCULK)) {
+            return XpStorage.MB_PER_XP * stack.getCount();
+        }
+        return 0;
+    }
+
+    /** What is left in the slot after the stack got turned into XP (empty containers stay). */
+    private static ItemStack remainderOf(ItemStack stack) {
+        if (stack.isOf(ModFluids.XP_BUCKET)) {
+            return new ItemStack(Items.BUCKET, stack.getCount());
+        }
+        if (stack.isOf(Items.EXPERIENCE_BOTTLE)) {
+            return new ItemStack(Items.GLASS_BOTTLE, stack.getCount());
+        }
+        return ItemStack.EMPTY;
+    }
+
 
     @Override
     public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
@@ -102,51 +150,40 @@ public class XpItemInserterEntity extends BlockEntity implements ImplementedInve
         BlockPos pos = blockPos.offset(facing, 1);
         Optional<StorageBlockEntity> storage = world.getBlockEntity(pos, ModBlocks.STORAGE_BLOCK_ENTITY);
 
-        if (storage.isPresent()) {
-            entity.syncedInt = storage.get().getContainerExperience();
-            if (!world.isReceivingRedstonePower(blockPos)) {
-                int mbToInsert = 0;
-                for (int i = 0; i < XpsAdditions.ITEM_SLOTS; i++) {
-                    ItemStack itemStackToInsert = entity.getItems().get(i);
-                    if (!itemStackToInsert.isEmpty()) {
-                        if (itemStackToInsert.isOf(ModItems.XP_BERRIES)) {
-                            mbToInsert += XpStorage.MB_PER_BERRIE * itemStackToInsert.getCount();
-                            entity.getItems().set(i, ItemStack.EMPTY);
-                            break;
-
-                        }
-                        if (itemStackToInsert.getItem().equals(ModFluids.XP_BUCKET)) {
-                            mbToInsert += FluidConstants.BUCKET;
-                            entity.getItems().set(i, new ItemStack(Items.BUCKET, 1));
-                            break;
-
-                        }
-                        if (itemStackToInsert.isOf(Items.EXPERIENCE_BOTTLE)) {
-                            mbToInsert += FluidConstants.BOTTLE * itemStackToInsert.getCount();
-                            entity.getItems().set(i, new ItemStack(Items.GLASS_BOTTLE, itemStackToInsert.getCount()));
-                            break;
-
-                        }
-                        if (itemStackToInsert.getItem().equals(Items.SCULK)) {
-                            mbToInsert += XpStorage.MB_PER_XP * itemStackToInsert.getCount();
-                            entity.getItems().set(i, ItemStack.EMPTY);
-                            break;
-
-                        }
-                    }
-                }
-                if (mbToInsert <= 0) {
-                    return;
-                }
-
-                try (Transaction transaction = Transaction.openOuter()) {
-                    storage.get().liquidXp.insert(FluidVariant.of(ModFluids.LIQUID_XP), mbToInsert, transaction);
-                    transaction.commit();
-                }
-            }
-
-        } else {
+        if (storage.isEmpty()) {
             entity.syncedInt = 0;
+            return;
+        }
+
+        entity.syncedInt = storage.get().getContainerExperience();
+        if (world.isReceivingRedstonePower(blockPos)) {
+            return;
+        }
+
+        // Find the first stack that can be converted, one stack per tick
+        int slot = -1;
+        long mbToInsert = 0;
+        for (int i = 0; i < XpsAdditions.ITEM_SLOTS; i++) {
+            mbToInsert = xpValueMb(entity.getItems().get(i));
+            if (mbToInsert > 0) {
+                slot = i;
+                break;
+            }
+        }
+        if (slot < 0) {
+            return;
+        }
+
+        // Only take the items when the obelisk really accepted all the XP, so nothing gets lost
+        try (Transaction transaction = Transaction.openOuter()) {
+            long inserted = storage.get().liquidXp.insert(FluidVariant.of(ModFluids.LIQUID_XP), mbToInsert, transaction);
+            if (inserted == mbToInsert) {
+                entity.getItems().set(slot, remainderOf(entity.getItems().get(slot)));
+                transaction.commit();
+                entity.markDirty();
+            } else {
+                transaction.abort();
+            }
         }
     }
 

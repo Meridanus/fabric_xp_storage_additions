@@ -3,6 +3,7 @@ package com.notker.xps_additions.blocks;
 import com.notker.xps_additions.XpsAdditions;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
@@ -14,6 +15,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 
@@ -31,7 +33,9 @@ public class Street extends Block {
 
     public Street() {
         super(FabricBlockSettings
-                .of(Material.GOURD)
+                .create()
+                .mapColor(MapColor.GREEN)
+                .pistonBehavior(PistonBehavior.DESTROY) // former Material.GOURD behaviour
                 .strength(1F, 6F)
                 .velocityMultiplier(XpsAdditions.RUNNING_SPEED));
 
@@ -42,12 +46,16 @@ public class Street extends Block {
                 .with(WEST, false));
     }
 
+    // Shapes are immutable: build them once instead of on every outline/collision query
+    private static final VoxelShape OUTLINE_SHAPE = VoxelShapes.fullCube();
+    private static final VoxelShape COLLISION_SHAPE = Block.createCuboidShape(0D, 0D, 0D, 16D, 14D, 16D);
+
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return Block.createCuboidShape(0D, 0D, 0D, 16D, 16D, 16D);
+        return OUTLINE_SHAPE;
     }
 
     public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return Block.createCuboidShape(0D, 0D, 0D, 16D, 14D, 16D);
+        return COLLISION_SHAPE;
     }
 
     public boolean canConnect(BlockState state) {

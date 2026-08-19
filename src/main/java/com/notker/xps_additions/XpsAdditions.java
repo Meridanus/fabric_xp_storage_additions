@@ -1,11 +1,8 @@
 package com.notker.xps_additions;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.notker.xp_storage.XpStorage;
 import com.notker.xps_additions.effects.GiggleStatusEffect;
 import com.notker.xps_additions.items.StaffOfRebark;
-import com.notker.xps_additions.mixin.AxeItemAccessor;
 import com.notker.xps_additions.regestry.AdditionBlocks;
 import com.notker.xps_additions.regestry.AdditionItems;
 import com.notker.xps_additions.screen.BoxScreenHandler;
@@ -13,13 +10,14 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
-import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +44,9 @@ public class XpsAdditions implements ModInitializer {
 
     public static final int ITEM_SLOTS = 9;
 
+    // Creative tab of the XP Obelisk base mod (registered there as "xps:general"; the key object itself is private in the base mod)
+    public static final RegistryKey<ItemGroup> XP_OBELISK_ITEM_GROUP = RegistryKey.of(RegistryKeys.ITEM_GROUP, new Identifier(XpStorage.MOD_ID, "general"));
+
     public static Identifier createModIdIdentifier (String path) {
         return new Identifier(MOD_ID, path);
     }
@@ -63,7 +64,7 @@ public class XpsAdditions implements ModInitializer {
         Registry.register(Registries.STATUS_EFFECT, new Identifier(MOD_ID, "giggle"), GIGGLE);
         Registry.register(Registries.SCREEN_HANDLER, new Identifier(MOD_ID, "xp_item_inserter"), BOX_SCREEN_HANDLER);
 
-        ItemGroupEvents.modifyEntriesEvent(XpStorage.ITEM_GROUP).register(content -> {
+        ItemGroupEvents.modifyEntriesEvent(XP_OBELISK_ITEM_GROUP).register(content -> {
             content.add(AdditionItems.MYSTICAL_CANDY);
             content.add(AdditionItems.RAW_ESSENCE);
             content.add(AdditionItems.RAW_ESSENCE_SHARD);
@@ -83,28 +84,8 @@ public class XpsAdditions implements ModInitializer {
         });
 
 
-        ServerWorldEvents.LOAD.register((server, level) -> {
-            if (StaffOfRebark.STRIPPED_BLOCKS == null) {
-                // get Actual Name of Staff
-                final String staffName = Text.translatable(AdditionItems.STAFF_OF_REBARK.getTranslationKey()).getString();
-                // Start Logging Process
-                LOGGER.info("Null on Server -> Add Log/Stripped variants to " + staffName);
-
-                // Create Map Builder
-                ImmutableMultimap.Builder<Block, Block> builder = ImmutableMultimap.builder();
-                // Get Blocks from Mixin and put it switched in to Map
-                AxeItemAccessor.getStrip().forEach((block, strippedBlock) -> builder.put(strippedBlock, block));
-                // Build the Map
-                Multimap<Block, Block> strippedBlock_Block = builder.build();
-                // Add Map to Staff
-                StaffOfRebark.STRIPPED_BLOCKS = strippedBlock_Block;
-
-                // InfoLogg Blocks
-                strippedBlock_Block.forEach((block, block2) -> XpsAdditions.LOGGER.info(staffName + " add: " + Registries.BLOCK.getId(block) + " to " +  Registries.BLOCK.getId(block2)));
-                // End Staff Logging
-                LOGGER.info("Finished adding " + strippedBlock_Block.size() + " Blocks to " + staffName);
-            }
-        });
+        // Build the stripped -> unstripped block map once all mods registered their strippable blocks
+        ServerWorldEvents.LOAD.register((server, level) -> StaffOfRebark.getStrippedBlocks());
 
     }
 }

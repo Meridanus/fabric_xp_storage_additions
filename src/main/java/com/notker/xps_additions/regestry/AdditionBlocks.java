@@ -7,7 +7,7 @@ import com.notker.xps_additions.entity.XpItemInserterEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
-import net.minecraft.block.Material;
+import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.BlockSoundGroup;
@@ -23,7 +23,7 @@ public class AdditionBlocks {
     public static final CutSoulCopperSlab CUT_SOUL_COPPER_SLAB = new CutSoulCopperSlab();
     public static final CutSoulCopperStairs CUT_SOUL_COPPER_STAIRS = new CutSoulCopperStairs();
     public static final XpItemInserter XP_ITEM_INSERTER = new XpItemInserter();
-    public static final Block RAW_ESSENCE_BLOCK = new Block(FabricBlockSettings.of(Material.AMETHYST).sounds(BlockSoundGroup.CALCITE).strength( 5F, 6F).requiresTool());
+    public static final Block RAW_ESSENCE_BLOCK = new Block(FabricBlockSettings.create().mapColor(MapColor.PURPLE).sounds(BlockSoundGroup.CALCITE).strength( 5F, 6F).requiresTool());
     public static final Street STREET = new Street();
 
 
