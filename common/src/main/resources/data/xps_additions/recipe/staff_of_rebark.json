@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "b E",
+    " / ",
+    "/ b"
+  ],
+  "key": {
+    "E": {
+      "item": "xps_additions:essence_crystal"
+    },
+    "b": {
+      "item": "xps:xp_berries"
+    },
+    "/": {
+      "item": "xps:xp_rod"
+    }
+  },
+  "result": {
+    "id": "xps_additions:staff_of_rebark",
+    "count": 1
+  }
+}

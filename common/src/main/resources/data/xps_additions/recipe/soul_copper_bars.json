@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "item": "xps:soul_copper_ingot"
+    }
+  },
+  "result": {
+    "id": "xps_additions:soul_copper_bars",
+    "count": 16
+  }
+}

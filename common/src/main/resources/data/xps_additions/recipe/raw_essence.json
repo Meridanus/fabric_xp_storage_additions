@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "xBx",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "minecraft:coals"
+    },
+    "B": {
+      "item": "xps:xp_bucket"
+    }
+  },
+  "result": {
+    "id": "xps_additions:raw_essence",
+    "count": 8
+  }
+}

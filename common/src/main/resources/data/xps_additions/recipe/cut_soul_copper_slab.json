@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "item": "xps_additions:cut_soul_copper"
+    }
+  },
+  "result": {
+    "id": "xps_additions:cut_soul_copper_slab",
+    "count": 6
+  }
+}

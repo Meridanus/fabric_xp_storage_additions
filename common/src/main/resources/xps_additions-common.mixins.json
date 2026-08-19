@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.notker.xps_additions.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AxeItemAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

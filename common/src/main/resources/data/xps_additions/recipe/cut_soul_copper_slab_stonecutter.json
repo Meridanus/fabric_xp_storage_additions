@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "xps_additions:cut_soul_copper"
+  },
+  "result": {
+    "id": "xps_additions:cut_soul_copper_slab",
+    "count": 2
+  }
+}

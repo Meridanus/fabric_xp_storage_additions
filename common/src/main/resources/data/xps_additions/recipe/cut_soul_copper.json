@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "key": {
+    "x": {
+      "item": "xps:block_soul_copper"
+    }
+  },
+  "result": {
+    "id": "xps_additions:cut_soul_copper",
+    "count": 4
+  }
+}

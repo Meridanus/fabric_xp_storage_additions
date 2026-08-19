@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "xps_additions",
+  "version": "${version}",
+
+  "name": "XP Obelisk Additions",
+  "description": "This mod add useful things to the XP Obelisk!",
+  "authors": [
+    "Meridanus"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/xp-obelisk-additions",
+    "sources": "https://github.com/Meridanus/fabric_xp_storage_additions"
+  },
+
+  "license": "MIT",
+  "icon": "assets/xps_additions/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.notker.xps_additions.fabric.XpsAdditionsFabric"
+    ],
+    "client": [
+      "com.notker.xps_additions.fabric.client.XpsAdditionsFabricClient"
+    ]
+  },
+  "mixins": [
+    "xps_additions-common.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric": "*",
+    "architectury": ">=13.0.0",
+    "xps": ">=0.5.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  }
+}

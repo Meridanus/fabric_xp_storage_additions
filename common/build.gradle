@@ -1,0 +1,18 @@
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+dependencies {
+    // We depend on Fabric Loader here to use the Fabric @Environment annotations.
+    // Do NOT use other classes from Fabric Loader.
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    modApi "dev.architectury:architectury:$rootProject.architectury_api_version"
+
+    // XP Obelisk (base mod), platform agnostic classes. Provided at runtime by the
+    // xps mod itself, so compile only.
+    modCompileOnly files("../depend/xp_obelisk-common-${rootProject.xp_obelisk_version}.jar")
+
+    // Patchouli's api package is platform agnostic; only used behind Platform.isModLoaded
+    modCompileOnly "vazkii.patchouli:Patchouli:$rootProject.patchouli_version-FABRIC"
+}

@@ -1,3 +1,8 @@
+###0.2.0
+    Updated to Minecraft 1.21.1.
+    Now available for NeoForge as well as Fabric (Architectury).
+    Needs XP Obelisk 0.5.0 or newer and Architectury API.
+
 ###0.1.10-r
     Updated to Minecraft 1.20.1 (needs XP Obelisk 0.4.11-r or newer and Fabric API).
     Handbook: the "Additions" chapter shows up again with current Patchouli versions.
