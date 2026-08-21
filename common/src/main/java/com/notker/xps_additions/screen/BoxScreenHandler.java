@@ -28,10 +28,16 @@ import net.minecraft.screen.ScreenHandlerType;
 
 
 public class BoxScreenHandler extends Generic3x3ContainerScreenHandler {
+
+    // Property delegate layout. Values travel as signed shorts, so the obelisk XP needs two slots.
+    public static final int PROPERTY_XP_LOW = 0;
+    public static final int PROPERTY_XP_HIGH = 1;
+    public static final int PROPERTY_COUNT = 2;
+
     PropertyDelegate propertyDelegate;
 
     public BoxScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-        this(syncId, playerInventory, new SimpleInventory(XpsAdditions.ITEM_SLOTS), new ArrayPropertyDelegate(1));
+        this(syncId, playerInventory, new SimpleInventory(XpsAdditions.ITEM_SLOTS), new ArrayPropertyDelegate(PROPERTY_COUNT));
         //super(syncId, playerInventory);
     }
 
@@ -41,8 +47,10 @@ public class BoxScreenHandler extends Generic3x3ContainerScreenHandler {
         this.addProperties(propertyDelegate);
     }
 
+    /** Both halves arrive sign extended from a short, the masks turn them back into 16 bits each. */
     public int getSyncedNumber(){
-        return propertyDelegate.get(0);
+        return ((propertyDelegate.get(PROPERTY_XP_HIGH) & 0xFFFF) << 16)
+                | (propertyDelegate.get(PROPERTY_XP_LOW) & 0xFFFF);
     }
 
 

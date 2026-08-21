@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/enchanting_table",
+  "textures": {
+    "particle": "xps_additions:block/cut_soul_copper",
+    "bottom": "xps_additions:block/cut_soul_copper",
+    "side": "xps_additions:block/cut_soul_copper",
+    "top": "xps_additions:block/xp_obelisk_plate_animation"
+  }
+}

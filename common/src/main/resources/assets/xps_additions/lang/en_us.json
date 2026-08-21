@@ -21,6 +21,23 @@
   "block.xps_additions.cut_soul_copper_slab": "Cut Soulcopper Slab",
   "block.xps_additions.cut_soul_copper_stairs": "Cut Soulcopper Stairs",
   "block.xps_additions.xp_item_inserter": "XP Item Inserter",
+  "block.xps_additions.xp_enchanter": "XP Enchanter",
   "block.xps_additions.raw_essence_block": "Raw Essence Block",
-  "block.xps_additions.street": "Street"
+  "block.xps_additions.street": "Street",
+
+  "gui.xps_additions.xp_enchanter.enchant": "Enchant",
+  "gui.xps_additions.xp_enchanter.enchant.tooltip": "Enchant one item",
+  "gui.xps_additions.xp_enchanter.cost": "Needs obelisk level %s, costs %s levels + %s lapis",
+  "gui.xps_additions.xp_enchanter.status.ready": "Ready",
+  "gui.xps_additions.xp_enchanter.status.no_obelisk": "No XP Obelisk next to it",
+  "gui.xps_additions.xp_enchanter.status.locked": "The obelisk is locked",
+  "gui.xps_additions.xp_enchanter.status.no_item": "No item to enchant",
+  "gui.xps_additions.xp_enchanter.status.not_enchantable": "Cannot be enchanted",
+  "gui.xps_additions.xp_enchanter.status.output_full": "Output slot is full",
+  "gui.xps_additions.xp_enchanter.status.no_lapis": "Not enough lapis",
+  "gui.xps_additions.xp_enchanter.status.no_xp": "Obelisk level too low",
+  "gui.xps_additions.xp_enchanter.status.nothing": "Nothing applicable",
+
+  "page.text.xp_enchanter": "An enchanting table that runs on stored experience instead of your own.$(br2)Place it next to an XP Obelisk, put the item into the upper slot and lapis lazuli below it. Pick the level with the $(o)-$() and $(o)+$() buttons, hold shift to jump by ten.$(br2)Press $(o)Enchant$() or send the block a redstone pulse. Hoppers fill both input slots and pull the finished item back out.",
+  "page.text.xp_enchanter_cost": "The obelisk has to hold as much experience as a player of the chosen level would have, and the enchant then takes exactly what that player would pay.$(br2)That is $(o)1$() level and one lapis up to level 10, $(o)2$() up to level 20 and $(o)3$() up to level 30.$(br2)Books come out as enchanted books, everything the vanilla table accepts works here as well."
 }

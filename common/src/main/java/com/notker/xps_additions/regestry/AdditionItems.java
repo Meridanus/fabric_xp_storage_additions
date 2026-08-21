@@ -73,6 +73,9 @@ public class AdditionItems {
     public static final RegistrySupplier<BlockItem> XP_ITEM_INSERTER_ITEM =
             ITEMS.register("xp_item_inserter", blockItem(AdditionBlocks.XP_ITEM_INSERTER));
 
+    public static final RegistrySupplier<BlockItem> XP_ENCHANTER_ITEM =
+            ITEMS.register("xp_enchanter", blockItem(AdditionBlocks.XP_ENCHANTER));
+
     public static final RegistrySupplier<BlockItem> RAW_ESSENCE_BLOCK_ITEM =
             ITEMS.register("raw_essence_block", blockItem(AdditionBlocks.RAW_ESSENCE_BLOCK, Rarity.RARE));
 

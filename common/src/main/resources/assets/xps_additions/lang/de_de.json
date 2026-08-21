@@ -21,6 +21,23 @@
   "block.xps_additions.cut_soul_copper_slab": "Geschnittene Seelenkupferstufe",
   "block.xps_additions.cut_soul_copper_stairs": "Geschnittene Seelenkupfertreppe",
   "block.xps_additions.xp_item_inserter": "EP Gegenstandseinfüller",
+  "block.xps_additions.xp_enchanter": "EP-Verzauberer",
   "block.xps_additions.raw_essence_block": "Roher Essenz Block",
-  "block.xps_additions.street": "Straße"
+  "block.xps_additions.street": "Straße",
+
+  "gui.xps_additions.xp_enchanter.enchant": "Zaubern",
+  "gui.xps_additions.xp_enchanter.enchant.tooltip": "Einen Gegenstand verzaubern",
+  "gui.xps_additions.xp_enchanter.cost": "Braucht Obelisk-Level %s, kostet %s Level + %s Lapis",
+  "gui.xps_additions.xp_enchanter.status.ready": "Bereit",
+  "gui.xps_additions.xp_enchanter.status.no_obelisk": "Kein EP-Obelisk daneben",
+  "gui.xps_additions.xp_enchanter.status.locked": "Der Obelisk ist gesperrt",
+  "gui.xps_additions.xp_enchanter.status.no_item": "Kein Gegenstand",
+  "gui.xps_additions.xp_enchanter.status.not_enchantable": "Nicht verzauberbar",
+  "gui.xps_additions.xp_enchanter.status.output_full": "Ausgabe ist voll",
+  "gui.xps_additions.xp_enchanter.status.no_lapis": "Zu wenig Lapis",
+  "gui.xps_additions.xp_enchanter.status.no_xp": "Obelisk-Level zu niedrig",
+  "gui.xps_additions.xp_enchanter.status.nothing": "Nichts anwendbar",
+
+  "page.text.xp_enchanter": "Ein Zaubertisch, der mit gespeicherten Erfahrungspunkten arbeitet statt mit deinen eigenen.$(br2)Stelle ihn neben einen EP-Obelisken, lege den Gegenstand in den oberen Platz und Lapislazuli darunter. Das Level stellst du mit den Knöpfen $(o)-$() und $(o)+$() ein, mit Umschalt in Zehnerschritten.$(br2)Dann auf $(o)Zaubern$() drücken oder einen Redstone-Impuls schicken. Trichter füllen beide Eingänge und holen das fertige Stück wieder heraus.",
+  "page.text.xp_enchanter_cost": "Der Obelisk muss so viel Erfahrung enthalten wie ein Spieler des gewählten Levels hätte, und die Verzauberung kostet dann genau das, was dieser Spieler zahlen würde.$(br2)Das sind $(o)1$() Level und ein Lapis bis Level 10, $(o)2$() bis Level 20 und $(o)3$() bis Level 30.$(br2)Bücher werden zu verzauberten Büchern, ansonsten geht alles, was auch der normale Zaubertisch annimmt."
 }

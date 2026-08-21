@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    "CEC",
+    "CLC"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:book"
+    },
+    "C": {
+      "item": "xps_additions:cut_soul_copper"
+    },
+    "E": {
+      "item": "xps_additions:essence_crystal"
+    },
+    "L": {
+      "item": "minecraft:lapis_block"
+    }
+  },
+  "result": {
+    "id": "xps_additions:xp_enchanter",
+    "count": 1
+  }
+}

@@ -4,6 +4,7 @@ import com.notker.xps_additions.items.StaffOfRebark;
 import com.notker.xps_additions.regestry.AdditionBlocks;
 import com.notker.xps_additions.regestry.AdditionMenus;
 import com.notker.xps_additions.screen.PositionedScreen;
+import com.notker.xps_additions.screen.XpEnchanterScreen;
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
@@ -34,9 +35,10 @@ public final class XpsAdditionsClient {
      * Fabric only. Architectury's neoforge implementation of this reacts to
      * RegisterMenuScreensEvent, which has already fired by the time a client setup
      * listener runs, so the factory would be dropped silently and the inserter GUI would
-     * never open. NeoForge registers the same screen through that event directly.
+     * never open. NeoForge registers the same screens through that event directly.
      */
     public static void registerScreens() {
         MenuRegistry.registerScreenFactory(AdditionMenus.BOX_SCREEN_HANDLER.get(), PositionedScreen::new);
+        MenuRegistry.registerScreenFactory(AdditionMenus.XP_ENCHANTER_SCREEN_HANDLER.get(), XpEnchanterScreen::new);
     }
 }

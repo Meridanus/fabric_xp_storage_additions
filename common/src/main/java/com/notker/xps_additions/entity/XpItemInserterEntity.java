@@ -35,25 +35,30 @@ import java.util.Optional;
 public class XpItemInserterEntity extends BlockEntity implements ImplementedInventory, ExtendedMenuProvider {
 
 
+    /** Experience of the obelisk in front of the inserter, display only. */
     private int syncedInt;
 
-    //PropertyDelegate is an interface which we will implement inline here.
-    //It can normally contain multiple integers as data identified by the index, but in this example we only have one.
+    /**
+     * Screen handler properties travel as signed shorts, so the obelisk XP goes over the wire in
+     * two halves and {@link BoxScreenHandler#getSyncedNumber()} puts it back together. A well
+     * filled obelisk holds far more than 32767 XP, and the header bar would show a nonsense level.
+     */
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
         @Override
         public int get(int index) {
-            return syncedInt;
+            return index == BoxScreenHandler.PROPERTY_XP_HIGH
+                    ? (syncedInt >>> 16) & 0xFFFF
+                    : syncedInt & 0xFFFF;
         }
 
         @Override
         public void set(int index, int value) {
-            syncedInt = value;
+            // display only, never set from the outside
         }
 
-        //this is supposed to return the amount of integers you have in your delegate, in our example only one
         @Override
         public int size() {
-            return 1;
+            return BoxScreenHandler.PROPERTY_COUNT;
         }
     };
 

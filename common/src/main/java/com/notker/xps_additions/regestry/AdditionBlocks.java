@@ -2,6 +2,7 @@ package com.notker.xps_additions.regestry;
 
 import com.notker.xps_additions.XpsAdditions;
 import com.notker.xps_additions.blocks.*;
+import com.notker.xps_additions.entity.XpEnchanterEntity;
 import com.notker.xps_additions.entity.XpItemInserterEntity;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -43,6 +44,9 @@ public class AdditionBlocks {
     public static final RegistrySupplier<XpItemInserter> XP_ITEM_INSERTER =
             BLOCKS.register("xp_item_inserter", () -> new XpItemInserter(XpItemInserter.settings()));
 
+    public static final RegistrySupplier<XpEnchanter> XP_ENCHANTER =
+            BLOCKS.register("xp_enchanter", () -> new XpEnchanter(XpEnchanter.settings()));
+
     public static final RegistrySupplier<Block> RAW_ESSENCE_BLOCK =
             BLOCKS.register("raw_essence_block", () -> new Block(AbstractBlock.Settings.create()
                     .mapColor(MapColor.PURPLE)
@@ -56,6 +60,10 @@ public class AdditionBlocks {
     public static final RegistrySupplier<BlockEntityType<XpItemInserterEntity>> XP_ITEM_INSERTER_ENTITY =
             BLOCK_ENTITY_TYPES.register("entity_xp_obelisk",
                     () -> BlockEntityType.Builder.create(XpItemInserterEntity::new, XP_ITEM_INSERTER.get()).build(null));
+
+    public static final RegistrySupplier<BlockEntityType<XpEnchanterEntity>> XP_ENCHANTER_ENTITY =
+            BLOCK_ENTITY_TYPES.register("xp_enchanter",
+                    () -> BlockEntityType.Builder.create(XpEnchanterEntity::new, XP_ENCHANTER.get()).build(null));
 
     public static void registerBlocks() {
         BLOCKS.register();

@@ -1,0 +1,22 @@
+{
+  "name": "block.xps_additions.xp_enchanter",
+  "icon": "xps_additions:xp_enchanter",
+  "category": "xps:additions_category",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "spotlight",
+      "item": "xps_additions:xp_enchanter",
+      "link_recipe": true,
+      "text": "page.text.xp_enchanter"
+    },
+    {
+      "type": "text",
+      "text": "page.text.xp_enchanter_cost"
+    },
+    {
+      "type": "crafting",
+      "recipe": "xps_additions:xp_enchanter"
+    }
+  ]
+}
