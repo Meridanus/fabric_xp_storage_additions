@@ -1,11 +1,13 @@
 package com.notker.xps_additions;
 
+import com.notker.xps_additions.client.XpEnchanterRenderer;
 import com.notker.xps_additions.items.StaffOfRebark;
 import com.notker.xps_additions.regestry.AdditionBlocks;
 import com.notker.xps_additions.regestry.AdditionMenus;
 import com.notker.xps_additions.screen.PositionedScreen;
 import com.notker.xps_additions.screen.XpEnchanterScreen;
 import dev.architectury.event.events.client.ClientPlayerEvent;
+import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.client.render.RenderLayer;
@@ -22,6 +24,8 @@ public final class XpsAdditionsClient {
      * its timing races the entrypoints on fabric.
      */
     public static void init() {
+        BlockEntityRendererRegistry.register(AdditionBlocks.XP_ENCHANTER_ENTITY.get(), XpEnchanterRenderer::new);
+
         RenderTypeRegistry.register(RenderLayer.getCutout(),
                 AdditionBlocks.SOUL_COPPER_TRAP_DOOR.get(),
                 AdditionBlocks.SOUL_COPPER_DOOR.get(),

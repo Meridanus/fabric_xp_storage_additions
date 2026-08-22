@@ -8,6 +8,7 @@ import com.notker.xps_additions.regestry.AdditionBlocks;
 import com.notker.xps_additions.screen.ImplementedInventory;
 import com.notker.xps_additions.screen.XpEnchanterScreenHandler;
 import dev.architectury.registry.menu.ExtendedMenuProvider;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.enchantment.Enchantment;
@@ -22,6 +23,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
@@ -78,6 +82,12 @@ public class XpEnchanterEntity extends BlockEntity implements ImplementedInvento
     @Nullable
     private Item nothingApplicableItem;
     private int nothingApplicableLevel;
+
+    /**
+     * What the clients were last told sits in the input slot, so {@link #syncIfInputChanged()} can
+     * tell a real change from the many other reasons this block entity is marked dirty.
+     */
+    private ItemStack lastSyncedInput = ItemStack.EMPTY;
 
     /**
      * Screen handler properties travel as signed shorts, so the obelisk XP goes over the wire in
@@ -167,6 +177,63 @@ public class XpEnchanterEntity extends BlockEntity implements ImplementedInvento
     @Override
     public boolean canPlayerUse(PlayerEntity player) {
         return Inventory.canPlayerUse(this, player);
+    }
+
+    /**
+     * The item the block shows hovering above itself, see {@code XpEnchanterRenderer}. This is the
+     * only slot that is worth sending to clients, everything else is behind the GUI where the
+     * screen handler already keeps it up to date.
+     */
+    public ItemStack getRenderStack() {
+        return getStack(INPUT_SLOT);
+    }
+
+    // --- client sync ----------------------------------------------------------------------------
+
+    /**
+     * Ask the server to resend this block entity to everyone who can see it
+     * (flushUpdates -> {@link #toUpdatePacket()}). Never call this from writeNbt!
+     */
+    private void sync() {
+        if (world != null && !world.isClient) {
+            world.updateListeners(pos, getCachedState(), getCachedState(), Block.NOTIFY_LISTENERS);
+        }
+    }
+
+    /**
+     * Sends an update packet only when the hovering item actually changed its look. The enchanter
+     * is marked dirty for plenty of reasons the clients do not care about - lapis being consumed,
+     * the level being turned up, the output being pulled out - and every sync is a packet to every
+     * player in view distance.
+     */
+    private void syncIfInputChanged() {
+        if (world == null || world.isClient) {
+            return;
+        }
+        ItemStack input = getStack(INPUT_SLOT);
+        if (!ItemStack.areEqual(lastSyncedInput, input)) {
+            // A copy, otherwise this would alias the live stack and never see a count change again
+            lastSyncedInput = input.copy();
+            sync();
+        }
+    }
+
+    @Override
+    public void markDirty() {
+        super.markDirty();
+        syncIfInputChanged();
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    /** The whole NBT, so a chunk arriving at a client already carries the item to show. */
+    @Override
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
+        return createNbt(registries);
     }
 
     // --- settings -------------------------------------------------------------------------------
@@ -294,6 +361,12 @@ public class XpEnchanterEntity extends BlockEntity implements ImplementedInvento
 
     /** Server side only, see {@code XpEnchanter#getTicker}. Just keeps the GUI numbers fresh. */
     public static void tick(World world, BlockPos pos, BlockState state, XpEnchanterEntity entity) {
+        // A compare against one stack, cheap enough to do every tick. Not every way the input slot
+        // can change runs through markDirty - hoppers and the loader item handlers write the list
+        // directly, and so does /item replace - so this is what guarantees the hovering item
+        // eventually catches up no matter who moved it.
+        entity.syncIfInputChanged();
+
         if (world.getTime() % DISPLAY_REFRESH_TICKS != 0) {
             return;
         }

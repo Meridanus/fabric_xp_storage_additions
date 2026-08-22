@@ -1,5 +1,6 @@
 ###0.2.0
     Added the XP Enchanter: an automatable enchanting table next to an XP Obelisk (GUI level setting, redstone trigger, hopper support).
+    The XP Enchanter shows the item it is about to enchant floating above the block.
     Updated to Minecraft 1.21.1.
     Now available for NeoForge as well as Fabric (Architectury).
     Needs XP Obelisk 0.5.0 or newer and Architectury API.
