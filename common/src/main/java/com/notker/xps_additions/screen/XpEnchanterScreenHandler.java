@@ -69,9 +69,9 @@ public class XpEnchanterScreenHandler extends ScreenHandler {
 
         inventory.onOpen(playerInventory.player);
 
-        addSlot(new InputSlot(inventory, XpEnchanterEntity.INPUT_SLOT, 27, 23));
-        addSlot(new LapisSlot(inventory, XpEnchanterEntity.LAPIS_SLOT, 27, 49));
-        addSlot(new OutputSlot(inventory, XpEnchanterEntity.OUTPUT_SLOT, 134, 36));
+        addSlot(new InputSlot(inventory, XpEnchanterEntity.INPUT_SLOT, 26, 38));
+        addSlot(new LapisSlot(inventory, XpEnchanterEntity.LAPIS_SLOT, 44, 38));
+        addSlot(new OutputSlot(inventory, XpEnchanterEntity.OUTPUT_SLOT, 125, 38));
 
         // Standard 176x166 container body: 27 inventory slots above the hotbar
         for (int row = 0; row < 3; row++) {
