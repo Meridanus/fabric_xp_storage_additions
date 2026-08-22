@@ -16,19 +16,19 @@ public class XpEnchanterScreen extends HandledScreen<XpEnchanterScreenHandler> {
     private static final Identifier TEXTURE = XpsAdditions.createModIdIdentifier("textures/gui/container/xp_enchanter.png");
 
     private static final int HEADER_HEIGHT = ObeliskXpBar.HEADER_HEIGHT;
-    private static final int BODY_HEIGHT = ObeliskXpBar.BODY_HEIGHT;
+    private static final int BODY_HEIGHT = ObeliskXpBar.BODY_HEIGHT + 16;
 
     // Level controls, in GUI coordinates
-    private static final int MINUS_X = 56;
-    private static final int PLUS_X = 90;
-    private static final int BUTTON_Y = 22;
-    private static final int BUTTON_SIZE = 14;
-    private static final int LEVEL_CENTER_X = 80;
-    private static final int LEVEL_TEXT_Y = 26;
-    private static final int ENCHANT_X = 54;
-    private static final int ENCHANT_Y = 44;
-    private static final int ENCHANT_WIDTH = 52;
-    private static final int ENCHANT_HEIGHT = 18;
+    private static final int MINUS_X = 7;
+    private static final int PLUS_X = 58;
+    private static final int BUTTON_Y = 10;
+    private static final int BUTTON_SIZE = 20;
+    private static final int LEVEL_CENTER_X = 44 ;
+    private static final int LEVEL_TEXT_Y = 16;
+    private static final int ENCHANT_X = 98;
+    private static final int ENCHANT_Y = 10;
+    private static final int ENCHANT_WIDTH = 71;
+    private static final int ENCHANT_HEIGHT = 20;
 
     private static final int TEXT_COLOR = 0x000000;  // black, like the other GUIs of the mod
     private static final int LEVEL_COLOR = 0xFFFFFF; // white, the level setting is a control value
@@ -50,7 +50,7 @@ public class XpEnchanterScreen extends HandledScreen<XpEnchanterScreenHandler> {
         super.init();
         // Center the title
         this.titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2;
-        this.titleY = 4;
+        this.titleY = -2;
 
         // Shift click moves the level in steps of ten, the server clamps it to 1..30 either way
         addDrawableChild(ButtonWidget.builder(Text.literal("-"), button -> sendButton(hasShiftDown()
@@ -114,7 +114,7 @@ public class XpEnchanterScreen extends HandledScreen<XpEnchanterScreenHandler> {
         super.render(context, mouseX, mouseY, delta);
 
         // Storage title, xp bar and level number, shared with the other obelisk driven GUIs
-        ObeliskXpBar.draw(context, textRenderer, TEXTURE, width, this.y, handler.getObeliskXp());
+        ObeliskXpBar.draw(context, textRenderer, TEXTURE, width, this.y - 12, handler.getObeliskXp());
 
         // Tooltips last, so they are drawn above the xp bar and the texts
         drawMouseoverTooltip(context, mouseX, mouseY);
@@ -148,7 +148,7 @@ public class XpEnchanterScreen extends HandledScreen<XpEnchanterScreenHandler> {
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         int x = (width - backgroundWidth) / 2;
-        int y = this.y - HEADER_HEIGHT;
+        int y = this.y - HEADER_HEIGHT - 16;
         context.drawTexture(TEXTURE, x, y, 0, 0, backgroundWidth, HEADER_HEIGHT + BODY_HEIGHT);
     }
 
