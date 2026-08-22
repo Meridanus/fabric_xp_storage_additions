@@ -25,7 +25,8 @@ public final class XpsAdditionsClient {
         RenderTypeRegistry.register(RenderLayer.getCutout(),
                 AdditionBlocks.SOUL_COPPER_TRAP_DOOR.get(),
                 AdditionBlocks.SOUL_COPPER_DOOR.get(),
-                AdditionBlocks.SOUL_COPPER_BARS.get());
+                AdditionBlocks.SOUL_COPPER_BARS.get(),
+                AdditionBlocks.XP_ENCHANTER.get());
 
         // Build the stripped -> unstripped block map once all mods registered their strippable blocks
         ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> StaffOfRebark.getStrippedBlocks());
