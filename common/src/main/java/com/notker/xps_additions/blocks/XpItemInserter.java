@@ -107,7 +107,7 @@ public class XpItemInserter extends BlockWithEntity implements Waterloggable {
         boolean sneaking = player != null && player.isSneaking();
 
         // Sneaking: place the block facing the same direction as the player, otherwise facing the player
-        Direction facing = sneaking ? ctx.getHorizontalPlayerFacing() : ctx.getHorizontalPlayerFacing().getOpposite();
+        Direction facing = sneaking ? ctx.getHorizontalPlayerFacing().getOpposite() : ctx.getHorizontalPlayerFacing();
 
         return this.getDefaultState().with(Properties.HORIZONTAL_FACING, facing).with(Properties.WATERLOGGED, bl);
     }
