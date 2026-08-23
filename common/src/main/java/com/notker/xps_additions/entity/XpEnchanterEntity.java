@@ -36,6 +36,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -285,13 +286,15 @@ public class XpEnchanterEntity extends BlockEntity implements ImplementedInvento
         if (world == null) {
             return null;
         }
-        for (Direction direction : Direction.values()) {
-            Optional<StorageBlockEntity> obelisk =
-                    world.getBlockEntity(pos.offset(direction), ModBlocks.STORAGE_BLOCK_ENTITY.get());
-            if (obelisk.isPresent()) {
-                return obelisk.get();
-            }
+
+        Direction facing = this.getCachedState().get(Properties.HORIZONTAL_FACING);
+        BlockPos pos = this.getPos().offset(facing, 1);
+        Optional<StorageBlockEntity> obelisk = world.getBlockEntity(pos, ModBlocks.STORAGE_BLOCK_ENTITY.get());
+
+        if (obelisk.isPresent()) {
+            return obelisk.get();
         }
+
         return null;
     }
 
@@ -325,6 +328,14 @@ public class XpEnchanterEntity extends BlockEntity implements ImplementedInvento
             return XpEnchanting.Status.NO_XP;
         }
         return XpEnchanting.Status.READY;
+    }
+
+    public boolean getXpEnchantingStatus() {
+        StorageBlockEntity obelisk = findObelisk();
+        if (obelisk == null) return false;
+
+        XpEnchanting.Status status = computeStatus(obelisk);
+        return status == XpEnchanting.Status.READY;
     }
 
     /**
