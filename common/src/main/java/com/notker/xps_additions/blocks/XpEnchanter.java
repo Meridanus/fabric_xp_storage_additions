@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -42,8 +43,29 @@ public class XpEnchanter extends BlockWithEntity {
 
     public static final MapCodec<XpEnchanter> CODEC = createCodec(XpEnchanter::new);
 
-    // Same height as the vanilla enchanting table
-    private static final VoxelShape SHAPE = Block.createCuboidShape(0D, 0D, 0D, 16D, 12D, 16D);
+    private static final VoxelShape CENTER_SHAPE = VoxelShapes.union(
+            Block.createCuboidShape(1D, 0D, 1D, 15D, 1D, 15D),   // bottom
+            Block.createCuboidShape(2D, 1D, 2D, 14D, 12D, 14D),  // middle
+            Block.createCuboidShape(1.5D, 1D, 1.5D, 3.5D, 12.5D, 3.5D), // Pillar 1
+            Block.createCuboidShape(12.5D, 1D, 1.5D, 14.5, 12.5D, 3.5D), // Pillar 2
+            Block.createCuboidShape(1.5D, 1D, 12.5D, 3.5D, 12.5D, 14.5D),  // Pillar 3
+            Block.createCuboidShape(12.5D, 1D, 12.5D, 14.5D, 12.5D, 14.5D)  // Pillar 4
+    );
+
+    private static final VoxelShape NORTH_OUT = Block.createCuboidShape(6D, 6D, -1D, 10D, 10D, 3D);  // Output
+    private static final VoxelShape EAST_OUT = Block.createCuboidShape(13D, 6D, 6D, 17D, 10D, 10D);  // Output
+    private static final VoxelShape SOUTH_OUT = Block.createCuboidShape(6D, 6D, 13D, 10D, 10D, 17D); // Output
+    private static final VoxelShape WEST_OUT = Block.createCuboidShape(-1D, 6D, 6D, 3D, 10D, 10D);   // Output
+    private static final VoxelShape NORTH_IN = Block.createCuboidShape(5D, 3D, 0D, 11D, 9D, 3D);     // Input
+    private static final VoxelShape WEST_IN = Block.createCuboidShape(0D, 3D, 5D, 3D, 9D, 11D);      // Input
+    private static final VoxelShape SOUTH_IN = Block.createCuboidShape(5D, 3D, 13D, 11D, 9D, 16D);   // Input
+    private static final VoxelShape EAST_IN = Block.createCuboidShape(13D, 3D, 5D, 16D, 9D, 11D);    // Input
+
+    private static final VoxelShape SHAPE_NORTH = VoxelShapes.union(CENTER_SHAPE, NORTH_OUT, EAST_IN, WEST_IN);
+    private static final VoxelShape SHAPE_EAST = VoxelShapes.union(CENTER_SHAPE, NORTH_IN, EAST_OUT, SOUTH_IN);
+    private static final VoxelShape SHAPE_SOUTH = VoxelShapes.union(CENTER_SHAPE, EAST_IN, SOUTH_OUT, WEST_IN);
+    private static final VoxelShape SHAPE_WEST = VoxelShapes.union(CENTER_SHAPE, NORTH_IN, SOUTH_IN, WEST_OUT);
+
 
     /** Ticks between the redstone pulse and the enchant, same delay a dispenser uses. */
     private static final int TRIGGER_DELAY = 4;
@@ -87,7 +109,12 @@ public class XpEnchanter extends BlockWithEntity {
 
     @Override
     protected VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext ctx) {
-        return SHAPE;
+        return switch (state.get(Properties.HORIZONTAL_FACING)) {
+            case SOUTH -> SHAPE_SOUTH;
+            case EAST -> SHAPE_EAST;
+            case WEST -> SHAPE_WEST;
+            default -> SHAPE_NORTH;
+        };
     }
 
     @Override
