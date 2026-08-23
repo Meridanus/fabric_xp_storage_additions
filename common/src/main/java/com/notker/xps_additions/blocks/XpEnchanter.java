@@ -15,16 +15,19 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
@@ -61,6 +64,7 @@ public class XpEnchanter extends BlockWithEntity {
         super(settings);
         setDefaultState(getStateManager()
                 .getDefaultState()
+                .with(Properties.HORIZONTAL_FACING, Direction.NORTH)
                 .with(Properties.TRIGGERED, false)
         );
     }
@@ -72,6 +76,7 @@ public class XpEnchanter extends BlockWithEntity {
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
+        stateManager.add(Properties.HORIZONTAL_FACING);
         stateManager.add(Properties.TRIGGERED);
     }
 
@@ -94,6 +99,31 @@ public class XpEnchanter extends BlockWithEntity {
             }
         }
         return ActionResult.SUCCESS;
+    }
+
+
+    @Nullable
+    @Override
+    public BlockState getPlacementState(ItemPlacementContext ctx) {
+
+        // The player can be null when the block is placed by a dispenser / other automation
+        PlayerEntity player = ctx.getPlayer();
+        boolean sneaking = player != null && player.isSneaking();
+
+        // Sneaking: place the block facing the same direction as the player, otherwise facing the player
+        Direction facing = sneaking ? ctx.getHorizontalPlayerFacing().getOpposite() : ctx.getHorizontalPlayerFacing();
+
+        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, facing);
+    }
+
+    @Override
+    protected BlockState rotate(BlockState state, BlockRotation rotation) {
+        return state.with(Properties.HORIZONTAL_FACING, rotation.rotate(state.get(Properties.HORIZONTAL_FACING)));
+    }
+
+    @Override
+    protected BlockState mirror(BlockState state, BlockMirror mirror) {
+        return state.rotate(mirror.getRotation(state.get(Properties.HORIZONTAL_FACING)));
     }
 
     /**
@@ -131,7 +161,12 @@ public class XpEnchanter extends BlockWithEntity {
 
     @Override
     protected int getComparatorOutput(BlockState state, World world, BlockPos pos) {
-        return ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
+        if (world.getBlockEntity(pos) instanceof XpEnchanterEntity blockEntity) {
+            boolean ready = blockEntity.getXpEnchantingStatus();
+            return ready ? 15 : 0;
+        }
+        return 0;
+        //return ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
     }
 
     @Nullable

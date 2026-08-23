@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "xps_additions:block/xp_enchanter" }
+    "facing=north": { "model": "xps_additions:block/xp_enchanter" },
+    "facing=south": { "model": "xps_additions:block/xp_enchanter", "y": 180 },
+    "facing=east": { "model": "xps_additions:block/xp_enchanter", "y": 90},
+    "facing=west": { "model": "xps_additions:block/xp_enchanter", "y": 270}
   }
 }
